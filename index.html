@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Orden de Pedido – Datos del Cliente + Relevamiento</title>
   <style>
-    :root{ --accent:#111; --ink:#222; --muted:#666; --stroke:#ddd; --bg:#fff; }
+    :root{ --accent:#111; --ink:#222; --muted:#666; --stroke:#ddd; --bg:#fff; --armado-prev-h: 240px; }
     *{box-sizing:border-box;}
     html,body{ height:100%; }
     body{
@@ -40,7 +40,7 @@
     .grid{ display:grid; gap:14px 18px; grid-template-columns: repeat(2, minmax(260px,1fr)); padding:18px; }
     .field{ display:flex; flex-direction:column; gap:6px; }
     .field label{ font-size:14px; font-weight:700; }
-    .field input, .field select{
+    .field input, .field select, .field textarea{
       border:1px solid var(--stroke); padding:10px 12px; border-radius:8px; font-size:16px; width:100%;
     }
     .hint{ font-size:12px; color:var(--muted); }
@@ -53,118 +53,200 @@
     .pill{
       display:inline-block; background:#111; color:#fff; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:800; letter-spacing:.4px;
     }
-
     .btn{ border:1px solid #000; background:#fff; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:600; text-decoration:none; color:#000; }
 
-    /* ====== Tarjetas de cámara (centradas) ====== */
-    .cam-grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:18px;
-      padding:18px;
-      justify-items:center;
-    }
-    .cam-card{
-      background:#fff;
-      border:1px solid #bbb;
-      border-radius:10px;
-      padding:16px;
-      width:100%;
-      max-width:720px;
-      margin:0 auto;
-      justify-items:center;
-    }
+    /* ====== Tarjetas de cámara ====== */
+    .cam-grid{ display:grid; grid-template-columns: 1fr; gap:18px; padding:18px; justify-items:center; }
+    .cam-card{ background:#fff; border:1px solid #bbb; border-radius:10px; padding:16px; width:100%; max-width:720px; margin:0 auto; }
     .cam-head{ font-weight:800; margin-bottom:10px; }
     .cam-actions{ display:flex; gap:10px; flex-wrap:wrap; }
     .btn.primary{ background:#1a73e8; color:#fff; border-color:#1a73e8; }
     .btn.secondary{ background:#fff; color:#111; border-color:#111; }
-    .preview{
-      margin-top:12px; text-align:center;
-      background:#f7f7f7; padding:10px; border-radius:8px; border:1px solid #e5e5e5;
-    }
-    .preview img{
-      max-width:100%; height:auto; display:none; border-radius:8px; border:1px solid #ccc;
-    }
+    .preview{ margin-top:12px; text-align:center; background:#f7f7f7; padding:10px; border-radius:8px; border:1px solid #e5e5e5; }
+    .preview img{ max-width:100%; height:auto; display:none; border-radius:8px; border:1px solid #ccc; }
     .hint.small{ font-size:12px; color:#666; margin-top:6px; display:block; }
 
-    /* ===== Dropdown simple dentro de tarjetas ===== */
+    /* Dropdown simple */
     .dropdown{ position:relative; }
     .dd-toggle{ position:relative; }
     .dd-menu{
-      position:absolute; top:100%; left:0;
-      min-width:180px; margin-top:6px; padding:6px;
-      background:#fff; border:1px solid #ccc; border-radius:8px;
-      box-shadow:0 8px 20px rgba(0,0,0,.12);
+      position:absolute; top:100%; left:0; min-width:180px; margin-top:6px; padding:6px;
+      background:#fff; border:1px solid #ccc; border-radius:8px; box-shadow:0 8px 20px rgba(0,0,0,.12);
       list-style:none; display:none; z-index:10;
     }
     .dd-menu.open{ display:block; }
     .dd-menu li{ margin:2px 0; }
-    .dd-item{
-      width:100%; text-align:left; background:#fff; color:#111;
-      border:1px solid #ddd; border-radius:6px; padding:8px 10px; cursor:pointer;
-    }
+    .dd-item{ width:100%; text-align:left; background:#fff; color:#111; border:1px solid #ddd; border-radius:6px; padding:8px 10px; cursor:pointer; }
     .dd-item:hover{ background:#f3f6ff; border-color:#c9d7ff; }
-    /* ARMADO: 2 columnas en desktop, 1 en móvil */
-.armado-2col{
-  grid-template-columns: repeat(2, minmax(260px,1fr));
+
+    /* ===== ARMADO ===== */
+    .armado-frame{ border:1px solid #cfcfcf; border-radius:10px; padding:14px; background:#fff; }
+    .armado-frame .field{ border:1px solid #e1e1e1; border-radius:8px; padding:10px; background:#fff; }
+    .armado-frame .subbar{ margin:-6px -6px 8px -6px; padding:8px 10px; background:#f6f6f6; border-bottom:1px solid #ececec; border-top-left-radius:6px; border-top-right-radius:6px; }
+    .armado-2col{ grid-template-columns: repeat(2, minmax(260px,1fr)); gap:14px; }
+    .armado-details{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:12px; }
+    .armado-details .stack-left{ display:grid; gap:12px; }
+    .armado-preview{ margin-top:8px; padding:10px; border:1px solid #e1e1e1; border-radius:8px; background:#fafafa; text-align:center; }
+    .armado-preview img{ display:none; width:100%; height:var(--armado-prev-h); object-fit:contain; object-position:center; border:1px solid #ddd; border-radius:8px; background:#fff; }
+    #observacionesArmado{ width:100%; min-height:220px; resize:vertical; border:1px solid #e1e1e1; border-radius:8px; padding:10px 12px; font-size:15px; }
+
+    @media (max-width:900px){
+      .armado-2col{ grid-template-columns:1fr; }
+      .armado-details{ grid-template-columns:1fr; }
+    }
+    :root{ --diseno-prev-h: 220px; } /* alto fijo de preview (ajustá a gusto) */
+
+  .diseno-frame{
+    border:1px solid #cfcfcf;
+    border-radius:10px;
+    padding:14px;
+    background:#fff;
+  }
+  .diseno-2col{
+    grid-template-columns: repeat(2, minmax(260px,1fr));
+  }
+  .design-preview{
+    margin-top:8px; padding:10px; border:1px solid #e1e1e1; border-radius:8px;
+    background:#fafafa; text-align:center;
+  }
+  .design-preview img{
+    display:none; width:100%; height:var(--diseno-prev-h);
+    object-fit:contain; object-position:center;
+    border:1px solid #ddd; border-radius:8px; background:#fff;
+  }
+  @media (max-width:900px){
+    .diseno-2col{ grid-template-columns:1fr; }
+  }
+  :root{ --diseno-prev-h: 220px; }
+
+.diseno-frame{
+  border:1px solid #cfcfcf; border-radius:10px; padding:14px; background:#fff;
+}
+.diseno-2col{ grid-template-columns: repeat(2, minmax(260px,1fr)); }
+.design-preview{
+  margin-top:8px; padding:10px; border:1px solid #e1e1e1; border-radius:8px;
+  background:#fafafa; text-align:center;
+}
+.design-preview img{
+  display:none; width:100%; height:var(--diseno-prev-h);
+  object-fit:contain; object-position:center;
+  border:1px solid #ddd; border-radius:8px; background:#fff;
 }
 
-/* Contenedor de previsualización reutilizable */
-.armado-preview{
-  margin-top: 10px;
-  padding: 12px;
-  border: 1px solid var(--stroke);
-  border-radius: 10px;
-  background: #fafafa;
-  display: grid;
-  grid-template-columns: 1fr;
-  justify-items: center;
-  gap: 8px;
+/* La fila de color ocupa el ancho completo */
+.fullrow{ grid-column:1 / -1; }
+.color-row{ display:grid; grid-template-columns: 320px 1fr; gap:12px; align-items:center; }
+
+@media (max-width:900px){
+  .diseno-2col{ grid-template-columns:1fr; }
+  .color-row{ grid-template-columns:1fr; }
 }
-.armado-preview img{
-  max-width: 100%;
-  width: min(520px, 100%);
-  height: auto;
-  display: none;               /* se muestra sólo cuando hay selección */
-  border-radius: 8px;
-  border: 1px solid #ddd;
+/* ===== NOTAS ===== */
+.notes-frame{
+  padding:16px 18px 18px;
+  background:#fff;
 }
 
-@media (max-width: 900px){
-  .armado-2col{ grid-template-columns: 1fr; }
+.notes-lines{
+  position:relative;
+  height: 160px;                       /* alto visible (5 líneas) */
+  border:1px solid #e1e1e1;
+  border-radius:8px;
+  /* 5 líneas tipo cuaderno: cada 28px */
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      #dcdcdc 0 1px,
+      transparent 1px 28px
+    );
 }
-/* ===== Tamaño uniforme para las vistas previas del ARMADO ===== */
-/* Ajustá esta variable a gusto (alto visible del “marco” de vista previa) */
-:root{
-  --armado-prev-h: 260px;   /* 220–300px suelen verse bien en A4 */
-}
-
-/* Caja de previsualización */
-.armado-preview{
-  margin-top: 10px;
-  padding: 8px;
-  border: 1px solid var(--stroke);
-  border-radius: 10px;
-  background: #fafafa;
-}
-
-/* Área fija para la imagen (mismo alto para todas) */
-.armado-preview img{
-  display: none;               /* se muestra al elegir */
-  width: 100%;
-  height: var(--armado-prev-h);
-  object-fit: contain;         /* encaja sin deformar */
-  object-position: center;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+.notes-lines textarea{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  padding:10px 12px;
+  border:0; outline:none;
+  background:transparent;
+  font-size:15px;
+  line-height:28px;                    /* coincide con el espaciamiento de líneas */
+  resize:vertical;
 }
 
+/* Pie: firma izquierda / aclaración + DNI derecha */
+.notes-footer{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:18px;
+  margin-top:16px;
+}
+
+/* Firma */
+.notes-sign-box{
+  display:flex; flex-direction:column; align-items:flex-start;
+  padding-top:22px;
+}
+.sign-line{
+  width: 62%;
+  min-width: 260px;
+  border-bottom:1px solid #9a9a9a;
+  height: 32px;                        /* espacio visual antes de la línea */
+}
+.sign-caption{
+  margin-top:6px;
+  font-size:14px; color:#555;
+}
+
+/* Aclaración + DNI */
+.notes-id-box{
+  display:grid; gap:12px; align-content:start;
+}
+.underline-label{
+  display:block; font-size:14px; color:#333; margin-bottom:2px;
+}
+.underline-input{
+  display:block; width:100%;
+  border:0; border-bottom:1px solid #9a9a9a;
+  padding:8px 2px 6px;
+  font-size:15px; background:#fff; outline:none;
+}
+
+/* Responsive */
+@media (max-width:900px){
+  .notes-footer{ grid-template-columns:1fr; }
+  .sign-line{ width:100%; min-width:0; }
+}
+/* Toolbar flotante arriba */
+.toolbar{
+  display:flex; justify-content:flex-end; gap:10px;
+  position:sticky; top:0; z-index:50;
+  padding:8px 0; background:#fff;
+}
+
+/* ===== Reglas de impresión ===== */
+@media print{
+  @page{
+    size: A4 portrait;           /* A4 vertical */
+    margin: 12mm;                /* márgenes del PDF */
+  }
+  .no-print, .dd-menu{ display:none !important; }  /* oculta botones/menús */
+  .wrap{ width:auto; margin:0; padding:0; }
+  .section{ break-inside: avoid-page; page-break-inside: avoid; }
+  input, select, textarea{
+    border:0 !important; background:transparent !important;
+    -webkit-appearance: none; appearance: none;
+  }
+  /* Evita bordes demasiado fuertes en impresión */
+  .armado-frame, .field, .notes-lines{ border-color:#cfcfcf !important; }
+}
 
   </style>
 </head>
 <body>
   <div class="wrap">
+    <!-- ===== Toolbar: Guardar como PDF ===== -->
+<div class="toolbar no-print">
+  <button id="btnPdf" class="btn primary">💾 Guardar como PDF</button>
+</div>
+
     <!-- ===== Encabezado ===== -->
     <header class="header" aria-label="Encabezado de orden">
       <div class="logo"><img src="img/superlock.png" alt="Superlock Puertas Blindadas"></div>
@@ -226,10 +308,9 @@
       </div>
     </section>
 
-    <!-- ===== Sección 2: RELEVAMIENTO GENERAL (parte azul) ===== -->
+    <!-- ===== Sección 2: RELEVAMIENTO GENERAL ===== -->
     <section class="section" aria-labelledby="titulo-relev">
       <div id="titulo-relev" class="section-title">RELEVAMIENTO GENERAL</div>
-
       <div class="grid" style="padding-bottom:6px;">
         <div class="row-2" style="grid-column:1 / -1;">
           <div class="field">
@@ -341,12 +422,8 @@
             <button type="button" class="btn primary cam-open">📷 Abrir cámara</button>
             <button type="button" class="btn secondary cam-retake" disabled>Retomar</button>
             <button type="button" class="btn secondary cam-clear" disabled>Eliminar</button>
-
-            <!-- NUEVO dropdown con 3 opciones -->
             <div class="dropdown">
-              <button type="button" class="btn secondary dd-toggle" aria-expanded="false">
-                Opciones ▾
-              </button>
+              <button type="button" class="btn secondary dd-toggle" aria-expanded="false">Opciones ▾</button>
               <ul class="dd-menu" role="menu" aria-label="Opciones de toma de medidas">
                 <li><button type="button" class="dd-item" data-value="Puerta">Puerta</button></li>
                 <li><button type="button" class="dd-item" data-value="Marco">Marco</button></li>
@@ -375,12 +452,8 @@
             <button type="button" class="btn primary cam-open">📷 Abrir cámara</button>
             <button type="button" class="btn secondary cam-retake" disabled>Retomar</button>
             <button type="button" class="btn secondary cam-clear" disabled>Eliminar</button>
-
-            <!-- Dropdown con 3 opciones para corte de marco -->
             <div class="dropdown">
-              <button type="button" class="btn secondary dd-toggle" aria-expanded="false">
-                Opciones ▾
-              </button>
+              <button type="button" class="btn secondary dd-toggle" aria-expanded="false">Opciones ▾</button>
               <ul class="dd-menu" role="menu" aria-label="Opciones de corte">
                 <li><button type="button" class="dd-item" data-value="Marco 1">Marco 1</button></li>
                 <li><button type="button" class="dd-item" data-value="Marco 2">Marco 2</button></li>
@@ -399,119 +472,207 @@
         </div>
       </div>
     </section>
+
     <!-- ===== Sección: ARMADO ===== -->
-<section class="section" aria-labelledby="titulo-armado">
-  <div id="titulo-armado" class="section-title">ARMADO</div>
+    <section class="section" aria-labelledby="titulo-armado">
+      <div id="titulo-armado" class="section-title">ARMADO</div>
 
-  <!-- Fila con dos columnas: sistema de seguridad + mano de apertura -->
-  <div class="grid armado-2col">
-    <!-- Sistema de seguridad -->
-    <div class="field">
-      <div class="subbar">sistema de seguridad</div>
-      <select id="sisSegSelect">
-        <option value="" selected disabled>Seleccionar</option>
-        <option value="202">202</option>
-        <option value="205">205</option>
-        <option value="5002">5002</option>
-        <option value="5005">5005</option>
-      </select>
+      <div class="armado-frame">
+        <!-- fila superior -->
+        <div class="grid armado-2col">
+          <div class="field">
+            <div class="subbar">sistema de seguridad</div>
+            <select id="seguridadModelo">
+              <option value="" selected disabled>Seleccionar</option>
+              <option value="202">202</option>
+              <option value="205">205</option>
+              <option value="5002">5002</option>
+              <option value="5005">5005</option>
+            </select>
+            <div class="armado-preview">
+              <img id="imgSeguridad" alt="Imagen de sistema de seguridad">
+              <small class="hint">Elegí un modelo para ver la imagen de referencia.</small>
+            </div>
+          </div>
 
-      <div class="armado-preview">
-        <img id="sisSegImg" alt="Vista previa del sistema de seguridad" />
-        <span class="hint">Elegí un modelo para ver la imagen de referencia.</span>
+          <div class="field">
+            <div class="subbar">mano de apertura</div>
+            <select id="manoApertura">
+              <option value="" selected disabled>Seleccionar</option>
+              <option value="int-izq">apertura interior izquierda</option>
+              <option value="ext-izq">apertura exterior izquierda</option>
+              <option value="int-der">apertura interior derecha</option>
+              <option value="ext-der">apertura exterior derecha</option>
+            </select>
+            <div class="armado-preview">
+              <img id="imgApertura" alt="Imagen de mano de apertura">
+              <small class="hint">Elegí una mano de apertura para ver la imagen.</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- fila inferior -->
+        <div class="armado-details">
+          <div class="stack-left">
+            <div class="field">
+              <div class="subbar">sistema smart</div>
+              <input id="smartMarcaModelo" type="text" placeholder="marca / modelo (escribir textual)">
+            </div>
+
+            <div class="field">
+              <div class="subbar">herrajes de seguridad</div>
+              <select id="herrajesSeg">
+                <option value="" selected disabled>Seleccionar</option>
+                <option value="solo protector">solo protector</option>
+                <option value="panel + protector">panel + protector</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <div class="subbar">visor angular</div>
+              <select id="visorAngular">
+                <option value="" selected disabled>Seleccionar</option>
+                <option value="visor óptico">visor óptico</option>
+                <option value="sin visor">sin visor</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="subbar">observaciones</div>
+            <textarea id="observacionesArmado" rows="10" placeholder="Escribir textual…"></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+<!-- ===== DISEÑO ===== -->
+<!-- ===== DISEÑO ===== -->
+<section class="section" aria-labelledby="titulo-diseno">
+  <div id="titulo-diseno" class="section-title">DISEÑO</div>
+
+  <div class="diseno-frame">
+    <div class="grid diseno-2col">
+      <!-- Revestimiento interior -->
+      <div class="field">
+        <div class="subbar">revestimiento interior</div>
+
+        <label for="matInterior">material</label>
+        <select id="matInterior">
+          <option value="" selected disabled>Seleccionar</option>
+          <option>Chapa</option>
+          <option>MDF</option>
+          <option>MDF + Enchapado</option>
+        </select>
+
+        <label for="disInterior" style="margin-top:8px;">diseño</label>
+        <select id="disInterior">
+          <option value="" selected disabled>Seleccionar diseño</option>
+          <option>SL-1R</option><option>SL-2R</option><option>SL-1RM</option><option>SL-2RM</option>
+          <option>SL-3R</option><option>SL-3RB</option><option>SL-3RM</option><option>SL-3RBM</option>
+          <option>SL-1LD</option><option>SL-2LA</option><option>SL-1LA</option><option>SL-1LB</option><option>SL-1LC</option>
+          <option>SL-3L</option><option>SL-4L</option><option>SL-2LB</option>
+          <option>SL-4R</option><option>SL-4RB</option><option>SL-4RM</option><option>SL-4RBM</option>
+          <option>SL-7L</option><option>SL-00</option><option>LISA</option>
+        </select>
+
+        <label for="termInterior" style="margin-top:10px;">terminación interior</label>
+        <input id="termInterior" type="text" placeholder="Ej.: sw-5896">
+
+        <div class="design-preview">
+          <img id="imgInterior" alt="Diseño interior seleccionado">
+          <small class="hint">Elegí material y diseño para ver la imagen de referencia.</small>
+        </div>
+      </div>
+
+      <!-- Revestimiento exterior -->
+      <div class="field">
+        <div class="subbar">revestimiento exterior</div>
+
+        <label for="matExterior">material</label>
+        <select id="matExterior">
+          <option value="" selected disabled>Seleccionar</option>
+          <option>Chapa</option>
+          <option>MDF</option>
+          <option>MDF + Enchapado</option>
+        </select>
+
+        <label for="disExterior" style="margin-top:8px;">diseño</label>
+        <select id="disExterior">
+          <option value="" selected disabled>Seleccionar diseño</option>
+          <option>SL-1R</option><option>SL-2R</option><option>SL-1RM</option><option>SL-2RM</option>
+          <option>SL-3R</option><option>SL-3RB</option><option>SL-3RM</option><option>SL-3RBM</option>
+          <option>SL-1LD</option><option>SL-2LA</option><option>SL-1LA</option><option>SL-1LB</option><option>SL-1LC</option>
+          <option>SL-3L</option><option>SL-4L</option><option>SL-2LB</option>
+          <option>SL-4R</option><option>SL-4RB</option><option>SL-4RM</option><option>SL-4RBM</option>
+          <option>SL-7L</option><option>SL-00</option><option>LISA</option>
+        </select>
+
+        <label for="termExterior" style="margin-top:10px;">terminación exterior</label>
+        <input id="termExterior" type="text" placeholder="Ej.: SW-5685n">
+
+        <div class="design-preview">
+          <img id="imgExterior" alt="Diseño exterior seleccionado">
+          <small class="hint">Elegí material y diseño para ver la imagen de referencia.</small>
+        </div>
       </div>
     </div>
 
-    <!-- Mano de apertura -->
-    <div class="field">
-      <div class="subbar">mano de apertura</div>
-      <select id="manoAperturaSelect">
-        <option value="" selected disabled>Seleccionar</option>
-        <option value="apertura interior izquierda">apertura interior izquierda</option>
-        <option value="apertura exterior izquierda">apertura exterior izquierda</option>
-        <option value="apertura interior derecha">apertura interior derecha</option>
-        <option value="apertura exterior derecha">apertura exterior derecha</option>
-      </select>
+    <!-- Color de marco (toma todo el ancho) -->
+    <div class="field fullrow" style="margin-top:12px;">
+      <div class="subbar">color marco (se pinta completo en un solo color)</div>
+      <div class="color-row">
+        <select id="colorMarco">
+          <option value="" selected disabled>Seleccionar</option>
+          <option value="Blanco">Blanco</option>
+          <option value="Negro">Negro</option>
+          <option value="Marrón">Marrón</option>
+          <option value="Gris">Gris</option>
+          <option value="Código">Código</option>
+        </select>
 
-      <div class="armado-preview">
-        <img id="manoAperturaImg" alt="Vista previa de mano de apertura" />
-        <span class="hint">Elegí una mano de apertura para ver la imagen.</span>
+        <input id="colorMarcoCodigo" type="text" placeholder="Ingresar código (RAL / Sherwin / etc.)" style="display:none;">
+      </div>
+      <small class="hint">Si seleccionás “Código”, escribí el código de color en el campo de la derecha.</small>
+    </div>
+  </div>
+</section>
+<!-- ===== NOTAS ===== -->
+<section class="section" aria-labelledby="titulo-notas">
+  <div id="titulo-notas" class="section-title">NOTAS</div>
+
+  <div class="notes-frame">
+    <!-- 5 líneas para escribir -->
+    <div class="notes-lines">
+      <textarea id="notas" aria-label="Notas (5 líneas)"></textarea>
+    </div>
+
+    <!-- Firma / Aclaración + DNI -->
+    <div class="notes-footer">
+      <div class="notes-sign-box">
+        <div class="sign-line" aria-hidden="true"></div>
+        <div class="sign-caption">Firma del cliente</div>
+      </div>
+
+      <div class="notes-id-box">
+        <label class="underline-label">Aclaración del cliente
+          <input type="text" class="underline-input" placeholder="">
+        </label>
+        <label class="underline-label">DNI del cliente
+          <input type="text" class="underline-input" placeholder="">
+        </label>
       </div>
     </div>
   </div>
 </section>
 
-
   </div>
 
   <script>
-    // Teléfonos y CUIT: mantener solo dígitos
-    function keepDigits(el){
-      const digits = el.value.replace(/\D+/g,'');
-      if (el.value !== digits) el.value = digits;
-    }
-    ['telefono','celular','cuit'].forEach(id=>{
-      const el = document.getElementById(id);
-      el?.addEventListener('input', ()=>keepDigits(el));
-    });
+    /* Mantener sólo dígitos en teléfonos/CUIT */
+    function keepDigits(el){ const digits = el.value.replace(/\D+/g,''); if (el.value !== digits) el.value = digits; }
+    ['telefono','celular','cuit'].forEach(id=>{ const el = document.getElementById(id); el?.addEventListener('input', ()=>keepDigits(el)); });
 
-    // Localidad → botón "Abrir en mapa"
-    const loc = document.getElementById('localidad');
-    const link = document.getElementById('mapLink');
-    function updateMapLink(){
-      const q = encodeURIComponent(loc?.value?.trim() || "");
-      if(link) link.href = q ? `https://www.google.com/maps/search/?api=1&query=${q}` : 'https://www.google.com/maps';
-    }
-    if(loc){ loc.addEventListener('input', updateMapLink); updateMapLink(); }
-
-    // ====== Lógica reutilizable para las tarjetas de cámara ======
-    (function(){
-      function setupCamCard(card){
-        const openBtn   = card.querySelector('.cam-open');
-        const retakeBtn = card.querySelector('.cam-retake');
-        const clearBtn  = card.querySelector('.cam-clear');
-        const inputFile = card.querySelector('.cam-input');
-        const imgPrev   = card.querySelector('.cam-preview');
-        const hiddenB64 = card.querySelector('.cam-base64');
-
-        function enableActions(hasPhoto){
-          retakeBtn.disabled = !hasPhoto;
-          clearBtn.disabled  = !hasPhoto;
-        }
-        function toBase64(file){
-          return new Promise((res, rej)=>{
-            const r = new FileReader();
-            r.onload = ()=>res(r.result);
-            r.onerror = rej;
-            r.readAsDataURL(file);
-          });
-        }
-
-        openBtn.addEventListener('click', ()=> inputFile.click());
-        retakeBtn.addEventListener('click', ()=> inputFile.click());
-        clearBtn.addEventListener('click', ()=>{
-          inputFile.value = '';
-          imgPrev.src = '';
-          imgPrev.style.display = 'none';
-          hiddenB64.value = '';
-          enableActions(false);
-        });
-
-        inputFile.addEventListener('change', async (ev)=>{
-          const file = ev.target.files?.[0];
-          if(!file) return;
-          const b64 = await toBase64(file);
-          imgPrev.src = b64;
-          imgPrev.style.display = 'block';
-          hiddenB64.value = b64;
-          enableActions(true);
-        });
-      }
-
-      document.querySelectorAll('.cam-card').forEach(setupCamCard);
-    })();
-
-    // ===== Dropdowns (genérico para todas las tarjetas) =====
+    /* Dropdowns de las tarjetas */
     (function(){
       function setupDropdown(dd){
         const toggle = dd.querySelector('.dd-toggle');
@@ -521,77 +682,120 @@
         function openMenu(){ menu.classList.add('open'); toggle.setAttribute('aria-expanded','true'); }
         function closeMenu(){ menu.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); }
 
-        toggle.addEventListener('click', (e)=>{
-          e.stopPropagation();
-          menu.classList.contains('open') ? closeMenu() : openMenu();
-        });
-
-        menu.addEventListener('click', (e)=>{
-          const btn = e.target.closest('.dd-item');
-          if(!btn) return;
-          const val = btn.dataset.value;
-          valueI.value = val;
-          toggle.textContent = `${val} ▾`;
-          closeMenu();
-        });
-
-        document.addEventListener('click', (e)=>{
-          if(!menu.classList.contains('open')) return;
-          if(!dd.contains(e.target)) closeMenu();
-        });
-        document.addEventListener('keydown', (e)=>{
-          if(e.key === 'Escape') closeMenu();
-        });
+        toggle.addEventListener('click', (e)=>{ e.stopPropagation(); menu.classList.contains('open') ? closeMenu() : openMenu(); });
+        menu.addEventListener('click', (e)=>{ const btn = e.target.closest('.dd-item'); if(!btn) return; valueI.value = btn.dataset.value; toggle.textContent = `${btn.dataset.value} ▾`; closeMenu(); });
+        document.addEventListener('click', ()=>closeMenu());
+        document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeMenu(); });
       }
-
       document.querySelectorAll('.cam-card .dropdown').forEach(setupDropdown);
     })();
+
+    /* Carga de fotos (cámaras) */
+    (function(){
+      function setupCamCard(card){
+        const openBtn   = card.querySelector('.cam-open');
+        const retakeBtn = card.querySelector('.cam-retake');
+        const clearBtn  = card.querySelector('.cam-clear');
+        const inputFile = card.querySelector('.cam-input');
+        const imgPrev   = card.querySelector('.cam-preview');
+        const hiddenB64 = card.querySelector('.cam-base64');
+
+        function enableActions(hasPhoto){ retakeBtn.disabled = !hasPhoto; clearBtn.disabled  = !hasPhoto; }
+        function toBase64(file){ return new Promise((res, rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
+
+        openBtn.addEventListener('click', ()=> inputFile.click());
+        retakeBtn.addEventListener('click', ()=> inputFile.click());
+        clearBtn.addEventListener('click', ()=>{ inputFile.value=''; imgPrev.src=''; imgPrev.style.display='none'; hiddenB64.value=''; enableActions(false); });
+
+        inputFile.addEventListener('change', async (ev)=>{ const file = ev.target.files?.[0]; if(!file) return; const b64 = await toBase64(file); imgPrev.src=b64; imgPrev.style.display='block'; hiddenB64.value=b64; enableActions(true); });
+      }
+      document.querySelectorAll('.cam-card').forEach(setupCamCard);
+    })();
+
+    /* ===== ARMADO: mapas de imágenes y listeners ===== */
+    const seguridadImgMap = {
+      "202":  "img/202.png",
+      "205":  "img/205.png",
+      "5002": "img/5002.png",
+      "5005": "img/5005.png"
+    };
+    /* Claves cortas que COINCIDEN con el value del select */
+    const aperturaImgMap = {
+      "int-izq": "img/mano_interior_izquierda.png",
+      "ext-izq": "img/mano_exterior_izquierda.png",
+      "int-der": "img/mano_interior_derecha.png",
+      "ext-der": "img/mano_exterior_derecha.png"
+    };
+
+    function loadPreview(selectEl, imgEl, map){
+      const src = map[selectEl.value];
+      if(src){ imgEl.src = src; imgEl.style.display = 'block'; }
+      else { imgEl.removeAttribute('src'); imgEl.style.display = 'none'; }
+    }
+
+    const selSeg  = document.getElementById('seguridadModelo');
+    const imgSeg  = document.getElementById('imgSeguridad');
+    const selMano = document.getElementById('manoApertura');
+    const imgMano = document.getElementById('imgApertura');
+
+    selSeg?.addEventListener('change', ()=> loadPreview(selSeg,  imgSeg,  seguridadImgMap));
+    selMano?.addEventListener('change',()=> loadPreview(selMano, imgMano, aperturaImgMap));
   </script>
   <script>
-  // Mapas: opción -> ruta de imagen
-  const SIS_SEG_IMAGES = {
-    "202":  "img/202.png",
-    "205":  "img/205.png",
-    "5002": "img/5002.png",
-    "5005": "img/5005.png"
-  };
+  // Map de diseños -> imagen (por defecto img/<codigo>.png)
+  const DESIGN_CODES = [
+    "SL-1R","SL-2R","SL-1RM","SL-2RM","SL-3R","SL-3RB","SL-3RM","SL-3RBM",
+    "SL-1LD","SL-2LA","SL-1LA","SL-1LB","SL-1LC","SL-3L","SL-4L","SL-2LB",
+    "SL-4R","SL-4RB","SL-4RM","SL-4RBM","SL-7L","SL-00","LISA"
+  ];
+  const DESIGN_IMG_MAP = DESIGN_CODES.reduce((acc,c)=>{ acc[c] = `img/${c}.png`; return acc; }, {});
 
-  // Sugerencia de nombres de archivo (podés cambiarlos):
-  // mano_interior_izquierda.png, mano_exterior_izquierda.png, mano_interior_derecha.png, mano_exterior_derecha.png
-  const MANO_AP_IMAGES = {
-    "apertura interior izquierda": "img/mano_interior_izquierda.png",
-    "apertura exterior izquierda": "img/mano_exterior_izquierda.png",
-    "apertura interior derecha":   "img/mano_interior_derecha.png",
-    "apertura exterior derecha":   "img/mano_exterior_derecha.png"
-  };
-
-  // Inicialización de ambos selects
-  (function initArmado(){
-    // Sistema de seguridad
-    const selSeg = document.getElementById('sisSegSelect');
-    const imgSeg = document.getElementById('sisSegImg');
-
-    if (selSeg && imgSeg){
-      selSeg.addEventListener('change', () => {
-        const src = SIS_SEG_IMAGES[selSeg.value] || "";
-        imgSeg.src = src;
-        imgSeg.style.display = src ? 'block' : 'none';
-        imgSeg.alt = src ? `Sistema de seguridad ${selSeg.value}` : 'Vista previa del sistema de seguridad';
-      });
+  function loadDesignImage(selectEl, imgEl){
+    const code = selectEl.value;
+    const src  = DESIGN_IMG_MAP[code];
+    if(src){
+      imgEl.src = src;
+      imgEl.style.display = 'block';
+      imgEl.alt = `Diseño ${code}`;
+    }else{
+      imgEl.removeAttribute('src');
+      imgEl.style.display = 'none';
+      imgEl.alt = 'Sin diseño';
     }
+  }
 
-    // Mano de apertura
-    const selMano = document.getElementById('manoAperturaSelect');
-    const imgMano = document.getElementById('manoAperturaImg');
+  const disInteriorSel = document.getElementById('disInterior');
+  const imgInterior    = document.getElementById('imgInterior');
+  const disExteriorSel = document.getElementById('disExterior');
+  const imgExterior    = document.getElementById('imgExterior');
 
-    if (selMano && imgMano){
-      selMano.addEventListener('change', () => {
-        const src = MANO_AP_IMAGES[selMano.value] || "";
-        imgMano.src = src;
-        imgMano.style.display = src ? 'block' : 'none';
-        imgMano.alt = src ? `Mano de apertura: ${selMano.value}` : 'Vista previa de mano de apertura';
-      });
-    }
+  disInteriorSel?.addEventListener('change', ()=> loadDesignImage(disInteriorSel, imgInterior));
+  disExteriorSel?.addEventListener('change', ()=> loadDesignImage(disExteriorSel, imgExterior));
+
+  // Color de marco: si eligen "Código" muestro el input
+  const colorSelect = document.getElementById('colorMarco');
+  const colorCode   = document.getElementById('colorMarcoCodigo');
+  colorSelect?.addEventListener('change', ()=>{
+    const isCode = colorSelect.value === 'Código';
+    colorCode.style.display = isCode ? 'block' : 'none';
+    if(!isCode){ colorCode.value = ''; }
+  });
+</script>
+<script>
+  // Botón: Guardar como PDF -> abre el diálogo de impresión
+  (function(){
+    const btn = document.getElementById('btnPdf');
+    if(!btn) return;
+
+    btn.addEventListener('click', () => {
+      // Sugerir nombre con el campo OP si existe
+      const originalTitle = document.title;
+      const op = document.getElementById('op')?.value?.trim();
+      if(op) document.title = `OP-${op}`;
+      window.print();
+      // Restaurar el título
+      setTimeout(() => { document.title = originalTitle; }, 500);
+    });
   })();
 </script>
 
