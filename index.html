@@ -104,6 +104,63 @@
       border:1px solid #ddd; border-radius:6px; padding:8px 10px; cursor:pointer;
     }
     .dd-item:hover{ background:#f3f6ff; border-color:#c9d7ff; }
+    /* ARMADO: 2 columnas en desktop, 1 en móvil */
+.armado-2col{
+  grid-template-columns: repeat(2, minmax(260px,1fr));
+}
+
+/* Contenedor de previsualización reutilizable */
+.armado-preview{
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  background: #fafafa;
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 8px;
+}
+.armado-preview img{
+  max-width: 100%;
+  width: min(520px, 100%);
+  height: auto;
+  display: none;               /* se muestra sólo cuando hay selección */
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+@media (max-width: 900px){
+  .armado-2col{ grid-template-columns: 1fr; }
+}
+/* ===== Tamaño uniforme para las vistas previas del ARMADO ===== */
+/* Ajustá esta variable a gusto (alto visible del “marco” de vista previa) */
+:root{
+  --armado-prev-h: 260px;   /* 220–300px suelen verse bien en A4 */
+}
+
+/* Caja de previsualización */
+.armado-preview{
+  margin-top: 10px;
+  padding: 8px;
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+/* Área fija para la imagen (mismo alto para todas) */
+.armado-preview img{
+  display: none;               /* se muestra al elegir */
+  width: 100%;
+  height: var(--armado-prev-h);
+  object-fit: contain;         /* encaja sin deformar */
+  object-position: center;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+
   </style>
 </head>
 <body>
@@ -155,7 +212,7 @@
         <div class="field">
           <label for="localidad">LOCALIDAD (Dirección de mapa)</label>
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-            <input id="localidad" type="text" placeholder="Ciudad / localidad / punto en el mapa" />
+            <input id="localidad" type="text" placeholder="Ciudad / localidad" />
           </div>
         </div>
         <div class="field">
@@ -342,6 +399,48 @@
         </div>
       </div>
     </section>
+    <!-- ===== Sección: ARMADO ===== -->
+<section class="section" aria-labelledby="titulo-armado">
+  <div id="titulo-armado" class="section-title">ARMADO</div>
+
+  <!-- Fila con dos columnas: sistema de seguridad + mano de apertura -->
+  <div class="grid armado-2col">
+    <!-- Sistema de seguridad -->
+    <div class="field">
+      <div class="subbar">sistema de seguridad</div>
+      <select id="sisSegSelect">
+        <option value="" selected disabled>Seleccionar</option>
+        <option value="202">202</option>
+        <option value="205">205</option>
+        <option value="5002">5002</option>
+        <option value="5005">5005</option>
+      </select>
+
+      <div class="armado-preview">
+        <img id="sisSegImg" alt="Vista previa del sistema de seguridad" />
+        <span class="hint">Elegí un modelo para ver la imagen de referencia.</span>
+      </div>
+    </div>
+
+    <!-- Mano de apertura -->
+    <div class="field">
+      <div class="subbar">mano de apertura</div>
+      <select id="manoAperturaSelect">
+        <option value="" selected disabled>Seleccionar</option>
+        <option value="apertura interior izquierda">apertura interior izquierda</option>
+        <option value="apertura exterior izquierda">apertura exterior izquierda</option>
+        <option value="apertura interior derecha">apertura interior derecha</option>
+        <option value="apertura exterior derecha">apertura exterior derecha</option>
+      </select>
+
+      <div class="armado-preview">
+        <img id="manoAperturaImg" alt="Vista previa de mano de apertura" />
+        <span class="hint">Elegí una mano de apertura para ver la imagen.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 
   </div>
 
@@ -448,6 +547,54 @@
       document.querySelectorAll('.cam-card .dropdown').forEach(setupDropdown);
     })();
   </script>
+  <script>
+  // Mapas: opción -> ruta de imagen
+  const SIS_SEG_IMAGES = {
+    "202":  "img/202.png",
+    "205":  "img/205.png",
+    "5002": "img/5002.png",
+    "5005": "img/5005.png"
+  };
+
+  // Sugerencia de nombres de archivo (podés cambiarlos):
+  // mano_interior_izquierda.png, mano_exterior_izquierda.png, mano_interior_derecha.png, mano_exterior_derecha.png
+  const MANO_AP_IMAGES = {
+    "apertura interior izquierda": "img/mano_interior_izquierda.png",
+    "apertura exterior izquierda": "img/mano_exterior_izquierda.png",
+    "apertura interior derecha":   "img/mano_interior_derecha.png",
+    "apertura exterior derecha":   "img/mano_exterior_derecha.png"
+  };
+
+  // Inicialización de ambos selects
+  (function initArmado(){
+    // Sistema de seguridad
+    const selSeg = document.getElementById('sisSegSelect');
+    const imgSeg = document.getElementById('sisSegImg');
+
+    if (selSeg && imgSeg){
+      selSeg.addEventListener('change', () => {
+        const src = SIS_SEG_IMAGES[selSeg.value] || "";
+        imgSeg.src = src;
+        imgSeg.style.display = src ? 'block' : 'none';
+        imgSeg.alt = src ? `Sistema de seguridad ${selSeg.value}` : 'Vista previa del sistema de seguridad';
+      });
+    }
+
+    // Mano de apertura
+    const selMano = document.getElementById('manoAperturaSelect');
+    const imgMano = document.getElementById('manoAperturaImg');
+
+    if (selMano && imgMano){
+      selMano.addEventListener('change', () => {
+        const src = MANO_AP_IMAGES[selMano.value] || "";
+        imgMano.src = src;
+        imgMano.style.display = src ? 'block' : 'none';
+        imgMano.alt = src ? `Mano de apertura: ${selMano.value}` : 'Vista previa de mano de apertura';
+      });
+    }
+  })();
+</script>
+
 
 </body>
 </html>
