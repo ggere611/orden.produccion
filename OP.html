@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orden de Pedido – Datos del Cliente + Relevamiento</title>
+  <style>
+    :root{ --accent:#111; --ink:#222; --muted:#666; --stroke:#ddd; --bg:#fff; }
+    *{box-sizing:border-box;}
+    html,body{ height:100%; }
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--ink); background:var(--bg); -webkit-text-size-adjust:100%;
+    }
+    .wrap{ width:1100px; margin:24px auto; padding:0 16px; }
+
+    /* ===== Encabezado ===== */
+    .header{
+      position:relative; display:grid; grid-template-columns:auto 1fr auto;
+      align-items:center; min-height:84px; padding:6px 0;
+    }
+    .logo{ grid-column:1; justify-self:start; }
+    .logo img{ height:56px; width:auto; display:block; }
+    .op-center{
+      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      display:flex; align-items:center; gap:8px;
+    }
+    .op-center label{font-weight:700; letter-spacing:.5px;}
+    .op-input{ width:320px; border:2px solid #000; padding:10px 12px; font-size:24px; font-weight:700; }
+    .side-col{ grid-column:3; display:flex; flex-direction:column; gap:10px; align-items:flex-end; }
+    .head-field{ display:flex; align-items:center; gap:8px; font-weight:600; }
+    .head-field input{ border:1px solid var(--stroke); padding:8px 10px; border-radius:6px; font-size:14px; }
+
+    /* ===== Secciones ===== */
+    .section{ margin-top:24px; border:1px solid #000; }
+    .section-title{
+      background:#111; color:#fff; text-align:center; padding:12px 10px;
+      font-weight:800; letter-spacing:.6px;
+    }
+    .grid{ display:grid; gap:14px 18px; grid-template-columns: repeat(2, minmax(260px,1fr)); padding:18px; }
+    .field{ display:flex; flex-direction:column; gap:6px; }
+    .field label{ font-size:14px; font-weight:700; }
+    .field input, .field select{
+      border:1px solid var(--stroke); padding:10px 12px; border-radius:8px; font-size:16px; width:100%;
+    }
+    .hint{ font-size:12px; color:var(--muted); }
+    .row-2{ display:grid; grid-template-columns: 1fr 1fr; gap:18px; }
+    .subbar{
+      font-weight:800; background:#f6f6f6; border:1px solid var(--stroke);
+      padding:8px 10px; margin-bottom:6px; border-radius:6px;
+    }
+    .line-2{ display:grid; grid-template-columns: 1fr 1fr; gap:18px; }
+    .pill{
+      display:inline-block; background:#111; color:#fff; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:800; letter-spacing:.4px;
+    }
+
+    .btn{ border:1px solid #000; background:#fff; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:600; text-decoration:none; color:#000; }
+
+    /* ====== Tarjetas de cámara (centradas) ====== */
+    .cam-grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:18px;
+      padding:18px;
+      justify-items:center;
+    }
+    .cam-card{
+      background:#fff;
+      border:1px solid #bbb;
+      border-radius:10px;
+      padding:16px;
+      width:100%;
+      max-width:720px;
+      margin:0 auto;
+      justify-items:center;
+    }
+    .cam-head{ font-weight:800; margin-bottom:10px; }
+    .cam-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+    .btn.primary{ background:#1a73e8; color:#fff; border-color:#1a73e8; }
+    .btn.secondary{ background:#fff; color:#111; border-color:#111; }
+    .preview{
+      margin-top:12px; text-align:center;
+      background:#f7f7f7; padding:10px; border-radius:8px; border:1px solid #e5e5e5;
+    }
+    .preview img{
+      max-width:100%; height:auto; display:none; border-radius:8px; border:1px solid #ccc;
+    }
+    .hint.small{ font-size:12px; color:#666; margin-top:6px; display:block; }
+
+    /* ===== Dropdown simple dentro de tarjetas ===== */
+    .dropdown{ position:relative; }
+    .dd-toggle{ position:relative; }
+    .dd-menu{
+      position:absolute; top:100%; left:0;
+      min-width:180px; margin-top:6px; padding:6px;
+      background:#fff; border:1px solid #ccc; border-radius:8px;
+      box-shadow:0 8px 20px rgba(0,0,0,.12);
+      list-style:none; display:none; z-index:10;
+    }
+    .dd-menu.open{ display:block; }
+    .dd-menu li{ margin:2px 0; }
+    .dd-item{
+      width:100%; text-align:left; background:#fff; color:#111;
+      border:1px solid #ddd; border-radius:6px; padding:8px 10px; cursor:pointer;
+    }
+    .dd-item:hover{ background:#f3f6ff; border-color:#c9d7ff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- ===== Encabezado ===== -->
+    <header class="header" aria-label="Encabezado de orden">
+      <div class="logo"><img src="img/superlock.png" alt="Superlock Puertas Blindadas"></div>
+      <div class="op-center">
+        <label for="op">OP-</label>
+        <input id="op" class="op-input" type="text" placeholder="Escribir número o código de OP…" />
+      </div>
+      <div class="side-col">
+        <div class="head-field">
+          <label for="fecha">FECHA:</label>
+          <input id="fecha" name="fecha" type="date" />
+        </div>
+        <div class="head-field">
+          <label for="asesor">ASESOR:</label>
+          <input id="asesor" name="asesor" type="text" placeholder="Nombre del asesor" />
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Sección 1: DATOS DEL CLIENTE ===== -->
+    <section class="section" aria-labelledby="titulo-datos">
+      <div id="titulo-datos" class="section-title">DATOS DEL CLIENTE</div>
+      <div class="grid">
+        <div class="field">
+          <label for="nombre">NOMBRE Y APELLIDO</label>
+          <input id="nombre" type="text" autocomplete="name" placeholder="Ej.: Geremias Gomez" />
+        </div>
+        <div class="field">
+          <label for="telefono">TELÉFONO</label>
+          <input id="telefono" type="tel" inputmode="numeric" pattern="[0-9]{7,15}" placeholder="Sólo números, sin espacios" title="Ingrese entre 7 y 15 dígitos sin espacios." />
+          <span class="hint">Se aceptan únicamente números seguidos (se eliminarán espacios, +, guiones, etc.).</span>
+        </div>
+        <div class="field">
+          <label for="email">EMAIL</label>
+          <input id="email" type="email" autocomplete="email" placeholder="nombre@correo.com" />
+        </div>
+        <div class="field">
+          <label for="celular">CELULAR</label>
+          <input id="celular" type="tel" inputmode="numeric" pattern="[0-9]{7,15}" placeholder="Sólo números, sin espacios" title="Ingrese entre 7 y 15 dígitos sin espacios." />
+        </div>
+        <div class="field">
+          <label for="direccion">DIRECCIÓN</label>
+          <input id="direccion" type="text" autocomplete="street-address" placeholder="Calle, número, piso, etc." />
+        </div>
+        <div class="field">
+          <label for="localidad">LOCALIDAD (Dirección de mapa)</label>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <input id="localidad" type="text" placeholder="Ciudad / localidad / punto en el mapa" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="razon">RAZÓN SOCIAL</label>
+          <input id="razon" type="text" placeholder="(opcional)" />
+        </div>
+        <div class="field">
+          <label for="cuit">CUIT/DNI</label>
+          <input id="cuit" type="text" inputmode="numeric" placeholder="Sólo números" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Sección 2: RELEVAMIENTO GENERAL (parte azul) ===== -->
+    <section class="section" aria-labelledby="titulo-relev">
+      <div id="titulo-relev" class="section-title">RELEVAMIENTO GENERAL</div>
+
+      <div class="grid" style="padding-bottom:6px;">
+        <div class="row-2" style="grid-column:1 / -1;">
+          <div class="field">
+            <div class="subbar">marco actual (estado, firmeza)</div>
+            <select id="marcoEstado">
+              <option value="" selected disabled>Elegir (1 a 5)</option>
+              <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="subbar">piso actual (material, nivel)</div>
+            <input id="pisoActual" type="text" placeholder="Ej.: porcelanato nivelado, cemento alisado, etc." />
+          </div>
+        </div>
+      </div>
+
+      <div class="grid" style="padding-top:6px;">
+        <div class="field">
+          <div class="subbar">modelo puerta</div>
+          <select id="modeloPuerta">
+            <option value="" selected disabled>Seleccionar</option>
+            <option>puerta entry [1.2mm]</option>
+            <option>puerta bunker [1.6mm]</option>
+            <option>puerta bunker + [2.1mm]</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="subbar">sist. de instalación</div>
+          <select id="sistInstal">
+            <option value="" selected disabled>Seleccionar</option>
+            <option>acople marco madera</option>
+            <option>acople marco metálico</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="subbar">marco nuevo</div>
+          <select id="marcoNuevo">
+            <option value="" selected disabled>Seleccionar</option>
+            <option>Funda</option>
+            <option>marco con perfil inferior</option>
+            <option>marco sin perfil inferior</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="subbar">ancho de marco</div>
+          <select id="anchoMarco">
+            <option value="" selected disabled>Seleccionar</option>
+            <option>Funda</option>
+            <option>10 cm</option>
+            <option>12 cm</option>
+            <option>15 cm</option>
+          </select>
+        </div>
+
+        <div class="field" style="grid-column:1 / -1; margin-top:8px;">
+          <div class="line-2">
+            <div class="field">
+              <div class="subbar">OTROS</div>
+              <input id="otros" type="text" placeholder="Observaciones / notas" />
+            </div>
+            <div class="field">
+              <div class="subbar">diag. ascensor</div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input id="diagAsc" type="number" inputmode="numeric" min="0" step="1" placeholder="0" style="max-width:240px;" />
+                <span class="pill">mm</span>
+              </div>
+              <span class="hint">Ingrese la diagonal del ascensor en milímetros.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" style="grid-column:1 / -1;">
+          <div class="line-2">
+            <div class="field">
+              <div class="subbar">herrajes</div>
+              <select id="herrajes">
+                <option value="" selected disabled>Seleccionar</option>
+                <option>estándar (nuevo)</option>
+                <option>especial (provisto por cliente)</option>
+                <option>sin herrajes</option>
+                <option>exterior, del cliente</option>
+                <option>interior, del cliente</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="subbar">forma de entrega</div>
+              <select id="formaEntrega">
+                <option value="" selected disabled>Seleccionar</option>
+                <option>acople + instalación</option>
+                <option>marco + instalación</option>
+                <option>marco (preajustada)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== RELEVAMIENTO · TOMA DE MEDIDAS (FOTO) ===== -->
+    <section class="section" aria-labelledby="titulo-foto-medidas">
+      <div id="titulo-foto-medidas" class="section-title">RELEVAMIENTO · TOMA DE MEDIDAS</div>
+      <div class="cam-grid">
+        <div class="cam-card" data-cam="medidas">
+          <div class="cam-head">Foto de referencia (toma de medidas)</div>
+          <div class="cam-actions">
+            <button type="button" class="btn primary cam-open">📷 Abrir cámara</button>
+            <button type="button" class="btn secondary cam-retake" disabled>Retomar</button>
+            <button type="button" class="btn secondary cam-clear" disabled>Eliminar</button>
+
+            <!-- NUEVO dropdown con 3 opciones -->
+            <div class="dropdown">
+              <button type="button" class="btn secondary dd-toggle" aria-expanded="false">
+                Opciones ▾
+              </button>
+              <ul class="dd-menu" role="menu" aria-label="Opciones de toma de medidas">
+                <li><button type="button" class="dd-item" data-value="Puerta">Puerta</button></li>
+                <li><button type="button" class="dd-item" data-value="Marco">Marco</button></li>
+                <li><button type="button" class="dd-item" data-value="puerta+paño">puerta+paño</button></li>
+              </ul>
+              <input type="hidden" name="medidas_opcion" class="dd-value">
+            </div>
+          </div>
+          <input type="file" class="cam-input" accept="image/*" capture="environment" hidden>
+          <div class="preview">
+            <img class="cam-preview" alt="Vista previa — Toma de medidas">
+            <span class="hint small">Usá esta foto para reemplazar los dibujos de “Toma de medidas”.</span>
+          </div>
+          <input type="hidden" name="foto_medidas_base64" class="cam-base64">
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== RELEVAMIENTO · CORTE DE MARCO (VISTA SUPERIOR) (FOTO) ===== -->
+    <section class="section" aria-labelledby="titulo-foto-corte">
+      <div id="titulo-foto-corte" class="section-title">RELEVAMIENTO · CORTE DE MARCO (VISTA SUPERIOR)</div>
+      <div class="cam-grid">
+        <div class="cam-card" data-cam="corte">
+          <div class="cam-head">Foto de referencia (corte de marco — vista superior)</div>
+          <div class="cam-actions">
+            <button type="button" class="btn primary cam-open">📷 Abrir cámara</button>
+            <button type="button" class="btn secondary cam-retake" disabled>Retomar</button>
+            <button type="button" class="btn secondary cam-clear" disabled>Eliminar</button>
+
+            <!-- Dropdown con 3 opciones para corte de marco -->
+            <div class="dropdown">
+              <button type="button" class="btn secondary dd-toggle" aria-expanded="false">
+                Opciones ▾
+              </button>
+              <ul class="dd-menu" role="menu" aria-label="Opciones de corte">
+                <li><button type="button" class="dd-item" data-value="Marco 1">Marco 1</button></li>
+                <li><button type="button" class="dd-item" data-value="Marco 2">Marco 2</button></li>
+                <li><button type="button" class="dd-item" data-value="Marco 3">Marco 3</button></li>
+              </ul>
+              <input type="hidden" name="corte_opcion" class="dd-value">
+            </div>
+          </div>
+
+          <input type="file" class="cam-input" accept="image/*" capture="environment" hidden>
+          <div class="preview">
+            <img class="cam-preview" alt="Vista previa — Corte de marco">
+            <span class="hint small">Usá esta foto para reemplazar las imágenes del corte de marco.</span>
+          </div>
+          <input type="hidden" name="foto_corte_base64" class="cam-base64">
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Teléfonos y CUIT: mantener solo dígitos
+    function keepDigits(el){
+      const digits = el.value.replace(/\D+/g,'');
+      if (el.value !== digits) el.value = digits;
+    }
+    ['telefono','celular','cuit'].forEach(id=>{
+      const el = document.getElementById(id);
+      el?.addEventListener('input', ()=>keepDigits(el));
+    });
+
+    // Localidad → botón "Abrir en mapa"
+    const loc = document.getElementById('localidad');
+    const link = document.getElementById('mapLink');
+    function updateMapLink(){
+      const q = encodeURIComponent(loc?.value?.trim() || "");
+      if(link) link.href = q ? `https://www.google.com/maps/search/?api=1&query=${q}` : 'https://www.google.com/maps';
+    }
+    if(loc){ loc.addEventListener('input', updateMapLink); updateMapLink(); }
+
+    // ====== Lógica reutilizable para las tarjetas de cámara ======
+    (function(){
+      function setupCamCard(card){
+        const openBtn   = card.querySelector('.cam-open');
+        const retakeBtn = card.querySelector('.cam-retake');
+        const clearBtn  = card.querySelector('.cam-clear');
+        const inputFile = card.querySelector('.cam-input');
+        const imgPrev   = card.querySelector('.cam-preview');
+        const hiddenB64 = card.querySelector('.cam-base64');
+
+        function enableActions(hasPhoto){
+          retakeBtn.disabled = !hasPhoto;
+          clearBtn.disabled  = !hasPhoto;
+        }
+        function toBase64(file){
+          return new Promise((res, rej)=>{
+            const r = new FileReader();
+            r.onload = ()=>res(r.result);
+            r.onerror = rej;
+            r.readAsDataURL(file);
+          });
+        }
+
+        openBtn.addEventListener('click', ()=> inputFile.click());
+        retakeBtn.addEventListener('click', ()=> inputFile.click());
+        clearBtn.addEventListener('click', ()=>{
+          inputFile.value = '';
+          imgPrev.src = '';
+          imgPrev.style.display = 'none';
+          hiddenB64.value = '';
+          enableActions(false);
+        });
+
+        inputFile.addEventListener('change', async (ev)=>{
+          const file = ev.target.files?.[0];
+          if(!file) return;
+          const b64 = await toBase64(file);
+          imgPrev.src = b64;
+          imgPrev.style.display = 'block';
+          hiddenB64.value = b64;
+          enableActions(true);
+        });
+      }
+
+      document.querySelectorAll('.cam-card').forEach(setupCamCard);
+    })();
+
+    // ===== Dropdowns (genérico para todas las tarjetas) =====
+    (function(){
+      function setupDropdown(dd){
+        const toggle = dd.querySelector('.dd-toggle');
+        const menu   = dd.querySelector('.dd-menu');
+        const valueI = dd.querySelector('.dd-value');
+
+        function openMenu(){ menu.classList.add('open'); toggle.setAttribute('aria-expanded','true'); }
+        function closeMenu(){ menu.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); }
+
+        toggle.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          menu.classList.contains('open') ? closeMenu() : openMenu();
+        });
+
+        menu.addEventListener('click', (e)=>{
+          const btn = e.target.closest('.dd-item');
+          if(!btn) return;
+          const val = btn.dataset.value;
+          valueI.value = val;
+          toggle.textContent = `${val} ▾`;
+          closeMenu();
+        });
+
+        document.addEventListener('click', (e)=>{
+          if(!menu.classList.contains('open')) return;
+          if(!dd.contains(e.target)) closeMenu();
+        });
+        document.addEventListener('keydown', (e)=>{
+          if(e.key === 'Escape') closeMenu();
+        });
+      }
+
+      document.querySelectorAll('.cam-card .dropdown').forEach(setupDropdown);
+    })();
+  </script>
+
+</body>
+</html>
