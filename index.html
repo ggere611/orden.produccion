@@ -237,6 +237,123 @@
   /* Evita bordes demasiado fuertes en impresión */
   .armado-frame, .field, .notes-lines{ border-color:#cfcfcf !important; }
 }
+/* ===== IMPRESIÓN A4: que no se corten los bloques ===== */
+@media print{
+  @page{
+    size: A4 portrait;      /* A4 vertical */
+    margin: 12mm;           /* márgenes del PDF */
+  }
+
+  /* layout base para que no “salte” el ancho */
+  html, body{ height:auto; }
+  .wrap{ width: 190mm; margin: 0 auto; padding: 0; } /* 210 - 2*10 mm aprox */
+
+  /* Ocultar UI y elementos interactivos en el PDF */
+  .no-print, .dd-menu{ display:none !important; }
+  button, .btn{ display:none !important; }
+
+  /* Evitar cortes dentro de SECCIONES y TARJETAS */
+  .section,
+  .armado-frame,
+  .field,
+  .frame-card,
+  .measure-card,
+  .cam-card,
+  .imgframe,
+  .armado-preview,
+  .preview,
+  .notes-lines{
+    break-inside: avoid;           /* estándar */
+    page-break-inside: avoid;      /* legacy */
+    overflow: visible !important;
+  }
+
+  /* En impresión, convertimos grids a flujo vertical para que no repartan ítems */
+  .grid,
+  .row-2,
+  .line-2,
+  .cam-grid,
+  .armado-2col,
+  .armado-details{
+    display: block !important;
+  }
+  .grid > *,
+  .row-2 > *,
+  .line-2 > *,
+  .cam-grid > *,
+  .armado-2col > *,
+  .armado-details > *{
+    width: 100% !important; 
+    margin-bottom: 10px;
+  }
+
+  /* Inputs y selects “limpios” en papel */
+  input, select, textarea{
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    -webkit-appearance: none; appearance: none;
+  }
+
+  /* Bordes suaves en papel */
+  .section, .armado-frame, .field, .notes-lines{
+    border-color: #cfcfcf !important;
+  }
+
+  /* Imágenes responsivas en impresión */
+  img{ max-width:100% !important; height:auto !important; }
+
+  /* Utilidad para cortar manualmente antes de un bloque si lo necesitás */
+  .page-break{ break-before: page; page-break-before: always; }
+}
+/* ===== IMPRESIÓN A4 ===== */
+@page{
+  size: A4;
+  margin: 10mm;                 /* márgenes del PDF/impresora */
+}
+
+/* Modo impresión: ancho fijo A4 y sin saltos dentro de bloques */
+@media print{
+  html, body{ background:#fff !important; }
+  /* Fuerza el “lienzo” a la caja útil de A4 (≈ 190 mm dentro de márgenes) */
+  .wrap{
+    width: 190mm !important;    /* ocupa el ancho útil de A4 */
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  /* Evita que se corten a mitad de página */
+  .section,
+  .armado-frame,
+  .cam-card,
+  .design-card,          /* por si usaste este nombre en DISEÑO */
+  .notes-card{           /* por si el bloque de notas está dentro de uno */
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Títulos pegados al bloque que les sigue */
+  .section-title{ break-after: avoid !important; }
+
+  /* Grillas que tienden a estirarse: permiten saltar antes/después, no dentro */
+  .grid, .cam-grid, .armado-2col, .armado-details{
+    break-inside: avoid-page !important;
+  }
+
+  /* Imágenes: que nunca “crezcan” más que la página */
+  img{
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Previews de ARMADO/Diseño: alturas más compactas para entrar en A4 */
+  :root{ --armado-prev-h: 200px; }   /* baja si aún se pasa (p.ej. 180px) */
+}
+
+/* Opcional: clase para compactar también en pantalla previa a imprimir */
+.compacto-a4 :root{ --armado-prev-h: 200px; }
+.compacto-a4 .wrap{ width: 190mm; }
+
 
   </style>
 </head>
@@ -572,7 +689,7 @@
           <option>SL-1LD</option><option>SL-2LA</option><option>SL-1LA</option><option>SL-1LB</option><option>SL-1LC</option>
           <option>SL-3L</option><option>SL-4L</option><option>SL-2LB</option>
           <option>SL-4R</option><option>SL-4RB</option><option>SL-4RM</option><option>SL-4RBM</option>
-          <option>SL-7L</option><option>SL-00</option><option>LISA</option>
+          <option>SL-7L</option><option>SL-C1</option><option>LISA</option><option>SL-C2</option>
         </select>
 
         <label for="termInterior" style="margin-top:10px;">terminación interior</label>
@@ -604,7 +721,7 @@
           <option>SL-1LD</option><option>SL-2LA</option><option>SL-1LA</option><option>SL-1LB</option><option>SL-1LC</option>
           <option>SL-3L</option><option>SL-4L</option><option>SL-2LB</option>
           <option>SL-4R</option><option>SL-4RB</option><option>SL-4RM</option><option>SL-4RBM</option>
-          <option>SL-7L</option><option>SL-00</option><option>LISA</option>
+          <option>SL-7L</option><option>SL-C1</option><option>LISA</option><option>SL-C2</option>
         </select>
 
         <label for="termExterior" style="margin-top:10px;">terminación exterior</label>
@@ -746,7 +863,7 @@
   const DESIGN_CODES = [
     "SL-1R","SL-2R","SL-1RM","SL-2RM","SL-3R","SL-3RB","SL-3RM","SL-3RBM",
     "SL-1LD","SL-2LA","SL-1LA","SL-1LB","SL-1LC","SL-3L","SL-4L","SL-2LB",
-    "SL-4R","SL-4RB","SL-4RM","SL-4RBM","SL-7L","SL-00","LISA"
+    "SL-4R","SL-4RB","SL-4RM","SL-4RBM","SL-7L","SL-C1","LISA","SL-C2"
   ];
   const DESIGN_IMG_MAP = DESIGN_CODES.reduce((acc,c)=>{ acc[c] = `img/${c}.png`; return acc; }, {});
 
@@ -797,6 +914,17 @@
       setTimeout(() => { document.title = originalTitle; }, 500);
     });
   })();
+</script>
+<script>
+  // Compacta las vistas justo al imprimir (y al generar PDF desde el navegador)
+  function activarCompacto(){ document.documentElement.classList.add('compacto-a4'); }
+  function desactivarCompacto(){ document.documentElement.classList.remove('compacto-a4'); }
+  if (window.matchMedia){
+    const mq = window.matchMedia('print');
+    mq.addEventListener?.('change', e => e.matches ? activarCompacto() : desactivarCompacto());
+  }
+  window.addEventListener('beforeprint', activarCompacto);
+  window.addEventListener('afterprint',  desactivarCompacto);
 </script>
 
 
