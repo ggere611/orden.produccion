@@ -461,6 +461,7 @@
             <option value="" selected disabled>Seleccionar</option>
             <option>acople marco madera</option>
             <option>acople marco metálico</option>
+            <option>Marco</option>
           </select>
         </div>
 
@@ -530,65 +531,216 @@
     </section>
 
     <!-- ===== RELEVAMIENTO · TOMA DE MEDIDAS (FOTO) ===== -->
-    <section class="section" aria-labelledby="titulo-foto-medidas">
-      <div id="titulo-foto-medidas" class="section-title">RELEVAMIENTO · TOMA DE MEDIDAS</div>
-      <div class="cam-grid">
-        <div class="cam-card" data-cam="medidas">
-          <div class="cam-head">Foto de referencia (toma de medidas)</div>
-          <div class="cam-actions">
-            <button type="button" class="btn primary cam-open">📷 Abrir cámara</button>
-            <button type="button" class="btn secondary cam-retake" disabled>Retomar</button>
-            <button type="button" class="btn secondary cam-clear" disabled>Eliminar</button>
-            <div class="dropdown">
-              <button type="button" class="btn secondary dd-toggle" aria-expanded="false">Opciones ▾</button>
-              <ul class="dd-menu" role="menu" aria-label="Opciones de toma de medidas">
-                <li><button type="button" class="dd-item" data-value="Puerta">Puerta</button></li>
-                <li><button type="button" class="dd-item" data-value="Marco">Marco</button></li>
-                <li><button type="button" class="dd-item" data-value="puerta+paño">puerta+paño</button></li>
-              </ul>
-              <input type="hidden" name="medidas_opcion" class="dd-value">
-            </div>
-          </div>
-          <input type="file" class="cam-input" accept="image/*" capture="environment" hidden>
-          <div class="preview">
-            <img class="cam-preview" alt="Vista previa — Toma de medidas">
-            <span class="hint small">Usá esta foto para reemplazar los dibujos de “Toma de medidas”.</span>
-          </div>
-          <input type="hidden" name="foto_medidas_base64" class="cam-base64">
-        </div>
+<!-- ===== RELEVAMIENTO · TOMA DE MEDIDAS (NUEVO) ===== -->
+<section class="section" aria-labelledby="titulo-foto-medidas" id="sec-foto-medidas">
+  <div id="titulo-foto-medidas" class="section-title">RELEVAMIENTO · TOMA DE MEDIDAS</div>
+
+  <style>
+    /* Layout 2 columnas: izquierda (imagen) / derecha (medidas) */
+    .medidas-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:18px;
+      padding:18px;
+      align-items:start;
+    }
+    .medidas-card{
+      background:#fff; border:1px solid #bbb; border-radius:10px; padding:14px;
+    }
+    .medidas-head{ font-weight:800; margin-bottom:10px; }
+
+    .preview-box{
+      border:1px solid #e5e5e5; border-radius:10px; padding:10px; background:#fafafa;
+      display:grid; justify-items:center; gap:8px;
+    }
+    .preview-box img{
+      width:100%; height:280px; object-fit:contain; background:#fff;
+      border:1px solid #ddd; border-radius:8px;
+    }
+
+    .mm-list{ display:grid; grid-template-columns:1fr; gap:10px; }
+    .mm-row{ display:flex; align-items:center; gap:10px; }
+    .mm-row label{ width:20px; font-weight:800; text-align:center; }
+    .mm-row input[type="number"]{
+      flex:1; padding:10px 12px; border:1px solid var(--stroke); border-radius:8px; font-size:16px;
+    }
+    .mm-pill{ font-size:12px; font-weight:800; background:#111; color:#fff; padding:4px 8px; border-radius:999px; }
+
+    /* Evitar cortes en impresión A4 */
+    @media print{
+      #sec-foto-medidas{ break-inside:avoid; page-break-inside:avoid; }
+      .medidas-grid{ break-inside:avoid; page-break-inside:avoid; }
+      .medidas-card{ break-inside:avoid; page-break-inside:avoid; }
+    }
+
+    /* Responsive: una sola columna en móvil */
+    @media (max-width: 900px){
+      .medidas-grid{ grid-template-columns:1fr; }
+    }
+  </style>
+
+  <div class="medidas-grid">
+    <!-- Izquierda: selector + imagen -->
+    <div class="medidas-card">
+      <div class="medidas-head">Referencia</div>
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+        <label for="refTipo" style="font-weight:700;">Tipo:</label>
+        <select id="refTipo">
+          <option value="" selected disabled>Seleccionar</option>
+          <!-- Cambiá los src si tus archivos tienen otros nombres -->
+          <option value="img/vano.png">Vano</option>
+          <option value="img/marco.png">Marco</option>
+        </select>
       </div>
-    </section>
+
+      <div class="preview-box">
+        <img id="refImg" alt="Referencia de toma de medidas" />
+        <small class="hint">Elegí “Vano” o “Marco” para ver la imagen de referencia.</small>
+      </div>
+    </div>
+
+    <!-- Derecha: Medidas A … F -->
+    <div class="medidas-card">
+      <div class="medidas-head">Medidas (mm)</div>
+      <div class="mm-list">
+        <div class="mm-row"><label for="mA">A</label><input id="mA" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="mm-pill">mm</span></div>
+        <div class="mm-row"><label for="mB">B</label><input id="mB" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="mm-pill">mm</span></div>
+        <div class="mm-row"><label for="mC">C</label><input id="mC" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="mm-pill">mm</span></div>
+        <div class="mm-row"><label for="mD">D</label><input id="mD" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="mm-pill">mm</span></div>
+        <div class="mm-row"><label for="mE">E</label><input id="mE" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="mm-pill">mm</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const sel = document.getElementById('refTipo');
+      const img = document.getElementById('refImg');
+      if(!sel || !img) return;
+
+      function updateRef(){
+        const src = sel.value || '';
+        if(src){
+          img.src = src;
+          img.style.display = 'block';
+          img.alt = 'Referencia: ' + sel.options[sel.selectedIndex].text;
+        }else{
+          img.removeAttribute('src');
+          img.style.display = 'none';
+        }
+      }
+      sel.addEventListener('change', updateRef);
+      updateRef(); // estado inicial
+    })();
+  </script>
+</section>
+
 
     <!-- ===== RELEVAMIENTO · CORTE DE MARCO (VISTA SUPERIOR) (FOTO) ===== -->
-    <section class="section" aria-labelledby="titulo-foto-corte">
-      <div id="titulo-foto-corte" class="section-title">RELEVAMIENTO · CORTE DE MARCO (VISTA SUPERIOR)</div>
-      <div class="cam-grid">
-        <div class="cam-card" data-cam="corte">
-          <div class="cam-head">Foto de referencia (corte de marco — vista superior)</div>
-          <div class="cam-actions">
-            <button type="button" class="btn primary cam-open">📷 Abrir cámara</button>
-            <button type="button" class="btn secondary cam-retake" disabled>Retomar</button>
-            <button type="button" class="btn secondary cam-clear" disabled>Eliminar</button>
-            <div class="dropdown">
-              <button type="button" class="btn secondary dd-toggle" aria-expanded="false">Opciones ▾</button>
-              <ul class="dd-menu" role="menu" aria-label="Opciones de corte">
-                <li><button type="button" class="dd-item" data-value="Marco 1">Marco 1</button></li>
-                <li><button type="button" class="dd-item" data-value="Marco 2">Marco 2</button></li>
-                <li><button type="button" class="dd-item" data-value="Marco 3">Marco 3</button></li>
-              </ul>
-              <input type="hidden" name="corte_opcion" class="dd-value">
-            </div>
-          </div>
+<!-- ===== RELEVAMIENTO · CORTE DE MARCO (VISTA SUPERIOR) — NUEVO ===== -->
+<section class="section" aria-labelledby="titulo-corte" id="sec-corte-marco">
+  <div id="titulo-corte" class="section-title">RELEVAMIENTO · CORTE DE MARCO (VISTA SUPERIOR)</div>
 
-          <input type="file" class="cam-input" accept="image/*" capture="environment" hidden>
-          <div class="preview">
-            <img class="cam-preview" alt="Vista previa — Corte de marco">
-            <span class="hint small">Usá esta foto para reemplazar las imágenes del corte de marco.</span>
-          </div>
-          <input type="hidden" name="foto_corte_base64" class="cam-base64">
-        </div>
+  <style>
+    /* Layout 2 columnas */
+    .corte-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:18px; padding:18px; align-items:start;
+    }
+    .corte-card{
+      background:#fff; border:1px solid #bbb; border-radius:10px; padding:14px;
+    }
+    .corte-head{ font-weight:800; margin-bottom:10px; }
+
+    .corte-preview{
+      border:1px solid #e5e5e5; border-radius:10px; padding:10px; background:#fafafa;
+      display:grid; justify-items:center; gap:8px;
+    }
+    .corte-preview img{
+      width:100%; height:280px; object-fit:contain; background:#fff;
+      border:1px solid #ddd; border-radius:8px;
+      display:none;
+    }
+
+    .mm-list{ display:grid; grid-template-columns:1fr; gap:10px; }
+    .mm-row{ display:flex; align-items:center; gap:10px; }
+    .mm-row label{ width:20px; font-weight:800; text-align:center; }
+    .mm-row input[type="number"]{
+      flex:1; padding:10px 12px; border:1px solid var(--stroke); border-radius:8px; font-size:16px;
+    }
+    .mm-pill{ font-size:12px; font-weight:800; background:#111; color:#fff; padding:4px 8px; border-radius:999px; }
+
+    /* Evitar cortes en impresión A4 */
+    @media print{
+      #sec-corte-marco, .corte-grid, .corte-card{ break-inside:avoid; page-break-inside:avoid; }
+    }
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .corte-grid{ grid-template-columns:1fr; }
+    }
+  </style>
+
+  <div class="corte-grid">
+    <!-- Izquierda: selector + imagen -->
+    <div class="corte-card">
+      <div class="corte-head">Referencia de marco</div>
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+        <label for="corteTipo" style="font-weight:700;">Marco:</label>
+        <select id="corteTipo">
+          <option value="" selected disabled>Seleccionar</option>
+          <!-- Ajustá a tus nombres reales de archivo -->
+          <option value="img/marco_1.png">Marco 1</option>
+          <option value="img/marco_2.png">Marco 2</option>
+          <option value="img/marco_3.png">Marco 3</option>
+        </select>
       </div>
-    </section>
+
+      <div class="corte-preview">
+        <img id="corteImg" alt="Referencia de corte de marco (vista superior)">
+        <small class="hint">Elegí “Marco 1/2/3” para ver la imagen de referencia.</small>
+      </div>
+    </div>
+
+    <!-- Derecha: Medidas A … G -->
+    <div class="corte-card">
+      <div class="corte-head">Medidas (mm)</div>
+      <div class="mm-list">
+        <div class="mm-row"><label for="cA">A</label><input id="cA" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="mm-pill">mm</span></div>
+        <div class="mm-row"><label for="cB">B</label><input id="cB" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="mm-pill">mm</span></div>
+        <div class="mm-row"><label for="cC">C</label><input id="cC" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="mm-pill">mm</span></div>
+        <div class="mm-row"><label for="cD">D</label><input id="cD" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="mm-pill">mm</span></div>
+        <div class="mm-row"><label for="cE">E</label><input id="cE" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="mm-pill">mm</span></div>
+        <div class="mm-row"><label for="cF">F</label><input id="cF" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="mm-pill">mm</span></div>
+        <div class="mm-row"><label for="cG">G</label><input id="cG" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><span class="mm-pill">mm</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const sel = document.getElementById('corteTipo');
+      const img = document.getElementById('corteImg');
+      if(!sel || !img) return;
+
+      function updateRef(){
+        const src = sel.value || '';
+        if(src){
+          img.src = src;
+          img.style.display = 'block';
+          img.alt = 'Referencia: ' + sel.options[sel.selectedIndex].text;
+        }else{
+          img.removeAttribute('src');
+          img.style.display = 'none';
+        }
+      }
+      sel.addEventListener('change', updateRef);
+      updateRef();
+    })();
+  </script>
+</section>
+
 
     <!-- ===== Sección: ARMADO ===== -->
     <section class="section" aria-labelledby="titulo-armado">
@@ -695,10 +847,6 @@
         <label for="termInterior" style="margin-top:10px;">terminación interior</label>
         <input id="termInterior" type="text" placeholder="Ej.: sw-5896">
 
-        <div class="design-preview">
-          <img id="imgInterior" alt="Diseño interior seleccionado">
-          <small class="hint">Elegí material y diseño para ver la imagen de referencia.</small>
-        </div>
       </div>
 
       <!-- Revestimiento exterior -->
@@ -726,11 +874,6 @@
 
         <label for="termExterior" style="margin-top:10px;">terminación exterior</label>
         <input id="termExterior" type="text" placeholder="Ej.: SW-5685n">
-
-        <div class="design-preview">
-          <img id="imgExterior" alt="Diseño exterior seleccionado">
-          <small class="hint">Elegí material y diseño para ver la imagen de referencia.</small>
-        </div>
       </div>
     </div>
 
